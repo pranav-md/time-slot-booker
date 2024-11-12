@@ -1,7 +1,9 @@
 const firebase = require('firebase/app');
 require('firebase/firestore');
 const {Firestore} = require('@google-cloud/firestore');
-const {convertToUTC, bookedSlotObject } = require('./functions.js');
+const { Timestamp } = require('firebase-admin/firestore');
+
+const {convertToUTC, bookedSlotObject, convertToDateTime, convertDateTimeToTimezone } = require('./functions.js');
 
 
 // In-memory array to store events
@@ -15,10 +17,11 @@ const eventsCollection = firestore.collection('events');
  * @param {Date} date - The date to save in the `time` field.
  * @returns {Promise<void>} - Resolves when the document is added.
  */
-async function saveEvent(timestamp, timezone) {
-    const utcTime = convertToUTC(timestamp, timezone);
+async function createEvent(timestamp, duration) {
+    const utcTime = convertToDateTime(timestamp).toUTC();
+
     try {
-      await eventsCollection.add(bookedSlotObject(utcTime));
+      await eventsCollection.add(bookedSlotObject(utcTime, duration));
       console.log('Event saved successfully');
     } catch (error) {
       console.error('Error saving event:', error);
@@ -29,11 +32,14 @@ async function saveEvent(timestamp, timezone) {
   async function getEventsWithinRange(startTime, endTime) {
     try {
       
+      const startTimeParam = Timestamp.fromDate(startTime.toJSDate())
+      const endTimeParam = Timestamp.fromDate(endTime.toJSDate())
+
       // Query for events that start before `endTime` and end after `startTime`
       const snapshot = await eventsCollection
-        .where('startsAt', '<=', endTime)
-        .where('endsAt', '>=', startTime)
-        .get();
+      .where('startTime', '<', endTimeParam) // Event starts before the given end time
+      .where('endTime', '>', startTimeParam) // Event ends after the given start time
+            .get();
   
       const events = [];
       snapshot.forEach(doc => {
@@ -50,18 +56,23 @@ async function saveEvent(timestamp, timezone) {
   async function checkForOverlappingEvents(startTime, endTime) {
     try {
       const eventsRef = firestore.collection('events');
-  
+      const startTimeParam = Timestamp.fromDate(startTime.toJSDate())
+      const endTimeParam = Timestamp.fromDate(endTime.toJSDate())
+
+
       // Query for any events that overlap with the given startTime and endTime
       const snapshot = await eventsRef
-        .where('startsAt', '<', endTime) // Events that start before the new end time
-        .where('endsAt', '>', startTime) // Events that end after the new start time
+      .where('startTime', '<', endTimeParam) // Event starts before the given end time
+      .where('endTime', '>', startTimeParam) // Event ends after the given start time
         .get();
+
+        console.log("SNAPSHOT SIZE: "+snapshot.size)
   
       // Check if any documents were found
       if (!snapshot.empty) {
-        return true; // Overlapping event(s) found
+        return false; // No overlapping event(s) found
       } else {
-        return false; // No overlapping events
+        return true; // Overlapping events found
       }
     } catch (error) {
       console.error('Error querying events:', error);
@@ -71,7 +82,7 @@ async function saveEvent(timestamp, timezone) {
   
 
   module.exports = {
-    saveEvent,
+    createEvent,
     getEventsWithinRange,
     checkForOverlappingEvents
 };

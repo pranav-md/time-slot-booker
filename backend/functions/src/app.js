@@ -8,7 +8,7 @@ app.use(cors({ origin: true })); // Enable CORS if needed
 app.use(express.json()); // Parse JSON body for POST requests
 
 // Use the routes defined in routes.js
-app.use('/', routes);
+app.use('/events', routes);
 
 // Export the app as an API function for Firebase Functions
 exports.api = functions.https.onRequest(app);

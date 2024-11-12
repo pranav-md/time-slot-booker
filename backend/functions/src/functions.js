@@ -1,5 +1,6 @@
 const { DateTime } = require('luxon');
 require('dotenv').config();  // Load the .env file
+const { Timestamp } = require('firebase-admin/firestore');
 
 // Access the values
 const startTime = process.env.START_TIME;
@@ -33,16 +34,40 @@ function generateIntervals(startTime, endTime) {
     const dateTimeObj = DateTime.fromISO(dateString, { setZone: true });
     return dateTimeObj;
   }
-function convertToUTC(timestamp, timezone) {
-    return DateTime.fromISO(timestamp, { zone: timezone }).toUTC();
+
+  function convertDateTimeToTimezone(dateTime, timezone) {
+  // Convert the DateTime object to the specified timezone
+  const convertedDateTime = dateTime.setZone(timezone);
+
+  // Check if conversion is valid
+  if (!convertedDateTime.isValid) {
+    throw new Error('Invalid DateTime object or timezone');
   }
+
+  return convertedDateTime;
+}
+
+function convertEventsToTimezone(events, timezone) {
+  return events.map(event => {
+    // Convert each timestamp to the specified timezone
+    const updatedStartsAt = convertToDateTime(event.startsAt).setZone(timezone);
+    const updatedEndsAt = convertToDateTime(event.endsAt).setZone(timezone);
+
+    // Return a new object with the converted timestamps
+    return {
+      ...event,
+      startsAt: updatedStartsAt.toISO(), // Converted to ISO string format
+      endsAt: updatedEndsAt.toISO()
+    };
+  });
+}
 
   
 function bookedSlotObject(timestamp, duration) {
     // Return an object with the time field in ISO format
     return {
-      startTime: timestamp.toISO(),
-      endTime: timestamp.toISO().plus(duration)
+      startTime: Timestamp.fromDate(timestamp.toJSDate()),
+      endTime: Timestamp.fromDate(timestamp.plus({minutes: duration}).toJSDate())
     };
   }
 
@@ -103,18 +128,31 @@ function getEventsWithoutOverlap(existingBookings, newBookings) {
   return validNewBookings;
 }
 
+function getTimezoneFromTimestamp(timestamp) {
+  // Try to parse the timestamp assuming it's in ISO format with timezone
+  const dateTime = DateTime.fromISO(timestamp, { setZone: true });
+  
+  if (!dateTime.isValid) {
+    throw new Error('Invalid timestamp format');
+  }
+
+  return dateTime.zoneName;
+}
+
   
   
   
 // Export the functions for use in other files
 module.exports = {
   generateIntervals,
-    convertToUTC,
+  convertDateTimeToTimezone,
     bookedSlotObject,
     convertToDateTime,
     validStartTimeInThisDate,
     validEndTimeInThisDate,
-    getEventsWithoutOverlap
+    getEventsWithoutOverlap,
+    getTimezoneFromTimestamp,
+    convertEventsToTimezone
 };
 
 
