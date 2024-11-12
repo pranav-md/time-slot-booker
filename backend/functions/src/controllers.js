@@ -1,65 +1,80 @@
-
-const firebase = require('firebase/app');
-require('firebase/firestore');
-const {Firestore} = require('@google-cloud/firestore');
-const {convertDateTimeToTimzone, bookedSlotObject, validStartTimeInThisDate, validEndTimeInThisDate, getEventsWithoutOverlap, generateIntervals, convertToDateTime, getTimezoneFromTimestamp, convertEventsToTimezone } = require('./functions.js');
-const { getEventsWithinRange : getEventsWithinRangeDB, createEvent: createEventDB, checkForOverlappingEvents } = require('./db.js');
-const { event } = require('firebase-functions/v1/analytics');
-
+const {
+  getEventsWithoutOverlap,
+  generateIntervals,
+  convertToDateTime,
+  getTimezoneFromTimestamp,
+  convertEventsToTimezone,
+  getStartAndEndTime,
+} = require("./functions.js");
+const {
+  getEventsWithinRange: getEventsWithinRangeDB,
+  createEvent: createEventDB,
+  checkForOverlappingEvents,
+} = require("./db.js");
 
 async function getFreeSlots(date, timezone) {
-    const validStartTime =  validStartTimeInThisDate(date, timezone)  
-    const validEndTime =  validEndTimeInThisDate(date, timezone)
+  const { startTime, endTime } = getStartAndEndTime(timezone, date);
 
-    const possibleEventSlots = generateIntervals(validStartTime, validEndTime)
-    const confirmedEventSlots = await getEventsWithinRangeDB(validStartTime, validEndTime)
+  console.log("valid start time:" + startTime.toUTC().toISO());
+  console.log("valid end time:" + endTime.toUTC().toISO());
 
-    const freeSlots = getEventsWithoutOverlap(confirmedEventSlots, possibleEventSlots)
+  const possibleEventSlots = generateIntervals(startTime, endTime);
+  const confirmedEventSlots = await getEventsWithinRangeDB(startTime, endTime);
 
-    return freeSlots
-  }
-  
-  async function createEvent(date, duration) {
-    const startsAt = convertToDateTime(date)
+  console.log({ confirmedEventSlots });
+  const freeSlots = getEventsWithoutOverlap(
+    confirmedEventSlots,
+    possibleEventSlots
+  );
 
-    const endsAt = startsAt.plus({minutes: duration})
+  return freeSlots;
+}
 
-    const isValidEvent = await checkForOverlappingEvents(startsAt.toUTC(), endsAt.toUTC())
+async function createEvent(date, duration) {
+  const startsAt = convertToDateTime(date);
 
-    if(isValidEvent){
+  const endsAt = startsAt.plus({ minutes: duration });
 
-      console.log("FOUND VALID EVENT")
-      await createEventDB(startsAt, duration)
+  const isValidEvent = await checkForOverlappingEvents(
+    startsAt.toUTC(),
+    endsAt.toUTC()
+  );
 
-      return true
-    }
+  if (isValidEvent) {
+    console.log("FOUND VALID EVENT");
+    await createEventDB(startsAt, duration);
 
-    console.log("RESULT: "+ isValidEvent)
-    console.log("FOUND INVALID EVENT")
-
-    return false
-  }
-  
-  async function getEventsWithinRange(startDate, endDate) {
-
-    
-    const timezone = getTimezoneFromTimestamp(startDate)
-
-    const startDateTime = convertToDateTime(startDate)
-    const endDateTime = convertToDateTime(endDate)
-
-
-    const eventsWithinRange = await getEventsWithinRangeDB(startDateTime.toUTC(), endDateTime.toUTC())
-
-    const eventsWithinRangeWithTimezone = convertEventsToTimezone(eventsWithinRange, timezone)
-
-    return eventsWithinRangeWithTimezone
+    return true;
   }
 
+  console.log("RESULT: " + isValidEvent);
+  console.log("FOUND INVALID EVENT");
+
+  return false;
+}
+
+async function getEventsWithinRange(startDate, endDate) {
+  const timezone = getTimezoneFromTimestamp(startDate);
+
+  const startDateTime = convertToDateTime(startDate);
+  const endDateTime = convertToDateTime(endDate);
+
+  const eventsWithinRange = await getEventsWithinRangeDB(
+    startDateTime.toUTC(),
+    endDateTime.toUTC()
+  );
+
+  const eventsWithinRangeWithTimezone = convertEventsToTimezone(
+    eventsWithinRange,
+    timezone
+  );
+
+  return eventsWithinRangeWithTimezone;
+}
 
 // Export the functions for use in other files
 module.exports = {
   createEvent,
   getFreeSlots,
-  getEventsWithinRange
+  getEventsWithinRange,
 };
