@@ -1,18 +1,12 @@
-<script setup>
-import DatePicker from "../components/DatePicker.vue";
-import TimezoneDropDown from "../components/TimezoneDropdown.vue";
-import FreeSlotsList from "../components/FreeSlotsList.vue";
-import TimepickerWithDuration from "../components/TimepickerWithDuration.vue";
-</script>
 
 <template>
   <div class="appointment-portal">
     <h1>Dr. John Appointment portal</h1>
-    <DatePicker />
-    <TimezoneDropDown />
+    <DatePicker @updateDateTime="handleDateTimeUpdate" />
+    <TimezoneDropDown @updateTimezone="handleTimezoneUpdate" />
     <div class="slot-book-container">
-      <FreeSlotsList />
-      <TimepickerWithDuration />
+      <FreeSlotsList :selectedDateTime="dateTimeInTimezone" />
+      <TimepickerWithDuration :selectedDateTime="dateTimeInTimezone" />
     </div>
   </div>
 </template>
@@ -52,3 +46,34 @@ h1 {
   border-top: 1px solid #ccc;
 }
 </style>
+
+
+<script>
+import DatePicker from "../components/DatePicker.vue";
+import TimezoneDropDown from "../components/TimezoneDropdown.vue";
+import FreeSlotsList from "../components/FreeSlotsList.vue";
+import TimepickerWithDuration from "../components/TimepickerWithDuration.vue";
+import { setDateTimeWithTimezone } from "./utils";
+import { DateTime } from "luxon";
+
+export default {
+  components: { DatePicker, TimezoneDropDown, FreeSlotsList, TimepickerWithDuration },
+  data() {
+    return {
+      dateTime: DateTime.now(),
+      timezone: 'Asia/Kolkata',
+      dateTimeInTimezone: DateTime.now().plus({minutes: 300})
+    };
+  },
+  methods: {
+    handleDateTimeUpdate({ dateTime }) {
+      this.dateTime = DateTime.fromJSDate(dateTime);
+      this.dateTimeInTimezone = setDateTimeWithTimezone(this.dateTime, this.timezone)
+    },
+    handleTimezoneUpdate({ timezone }) {
+      this.timezone = timezone;
+      this.dateTimeInTimezone = setDateTimeWithTimezone(this.dateTime, this.timezone)
+    },
+  },
+};
+</script>
