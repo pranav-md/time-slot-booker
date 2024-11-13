@@ -6,7 +6,14 @@ const {
   getFreeSlots,
 } = require("./controllers.js");
 
-// GET /events with "startDate", "endDate" as query parameters
+/**
+ * GET /events
+ *
+ * Retrieve events between the specified start and end dates.
+ *
+ * @param {string} startDate - The start date for filtering events.
+ * @param {string} endDate - The end date
+ */
 router.get("/", async (req, res) => {
   const { startDate, endDate } = req.query;
   if (!startDate || !endDate) {
@@ -19,7 +26,15 @@ router.get("/", async (req, res) => {
   res.json(result);
 });
 
-// POST /events with "date" and "timezone" as body parameters
+/**
+ * POST /events
+ *
+ * Create a new event with the specified date and duration.
+ *
+ * @param {Object} body - The request body containing event details.
+ * @param {string} body.date - The date and time of the event (ISO string format).
+ * @param {number} body.duration - The duration of the event in minutes.
+ */
 router.post("/", async (req, res) => {
   const { dateTime, duration } = req.body;
   if (!dateTime || !duration) {
@@ -28,7 +43,6 @@ router.post("/", async (req, res) => {
 
   const result = await createEvent(dateTime, duration);
 
-  console.log("ROUTE RESULT: " + result);
   if (result) {
     // Event created successfully
     return res.status(200).json({ message: "Event created successfully" });
@@ -38,15 +52,22 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET /events/free-slots with "start_date" and "end_date" as query parameters
+/**
+ * GET /events/free-slots
+ *
+ * Retrieve available event time slots.
+ *
+ * @param {string} dateTime - The date and time for which to retrieve the available slots.(YYYY-MM-DD format)
+ * @param {string} timezone - The timezone to adjust the slots for.
+ */
 router.get("/free-slots", async (req, res) => {
-  const { dateTime, timezone } = req.query;
-  if (!dateTime || !timezone) {
+  const { dateTime: date, timezone } = req.query;
+  if (!date || !timezone) {
     return res.status(400).json({ error: "Missing dateTime or timezone" });
   }
 
-  const result = await getFreeSlots(dateTime, timezone);
-  // Implement your logic for GET /events/free-slots
+  const result = await getFreeSlots(date, timezone);
+
   res.status(200).json(result);
 });
 

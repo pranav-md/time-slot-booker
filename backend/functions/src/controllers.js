@@ -9,21 +9,26 @@ const {
 const {
   getEventsWithinRange: getEventsWithinRangeDB,
   createEvent: createEventDB,
-  checkForOverlappingEvents,
+  isNonOverlappingEvent,
 } = require("./db.js");
+const { DateTime } = require("luxon");
 
 async function getFreeSlots(date, timezone) {
   const { startTime, endTime } = getStartAndEndTime(timezone, date);
 
-  console.log("valid start time:" + startTime.toUTC().toISO());
-  console.log("valid end time:" + endTime.toUTC().toISO());
+  const currDate = DateTime.fromISO(`${date}T00:00:00`, {
+    zone: timezone,
+  })
 
-  const possibleEventSlots = generateIntervals(startTime, endTime);
-  const confirmedEventSlots = await getEventsWithinRangeDB(startTime, endTime);
+  const possibleEventSlots = generateIntervals(
+    startTime,
+    endTime,
+    currDate
+  );
+  const bookedEventSlots = await getEventsWithinRangeDB(startTime, endTime);
 
-  console.log({ confirmedEventSlots });
   const freeSlots = getEventsWithoutOverlap(
-    confirmedEventSlots,
+    bookedEventSlots,
     possibleEventSlots
   );
 
@@ -35,20 +40,16 @@ async function createEvent(date, duration) {
 
   const endsAt = startsAt.plus({ minutes: duration });
 
-  const isValidEvent = await checkForOverlappingEvents(
+  const isValidEvent = await isNonOverlappingEvent(
     startsAt.toUTC(),
     endsAt.toUTC()
   );
 
   if (isValidEvent) {
-    console.log("FOUND VALID EVENT");
     await createEventDB(startsAt, duration);
 
     return true;
   }
-
-  console.log("RESULT: " + isValidEvent);
-  console.log("FOUND INVALID EVENT");
 
   return false;
 }

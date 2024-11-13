@@ -1,8 +1,8 @@
 # Node.js modules and environment files
 /backend/node_modules
-/frontend/node_modules
+/frontend-app/node_modules
 /backend/.env
-/frontend/.env
+/frontend-app/.env
 
 # Logs
 logs
@@ -21,9 +21,9 @@ Thumbs.db
 
 # Build outputs
 /backend/dist
-/frontend/dist
+/frontend-app/dist
 /backend/build
-/frontend/build
+/frontend-app/build
 
 # Dependency directories
 node_modules/
