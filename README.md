@@ -1,10 +1,12 @@
 
 # Dr. John's Appointment Portal
 
-Dr. John's Appointment Portal is a full-stack application that allows users to easily create and search for appointment bookings. The system includes a Node.js backend with Firebase Firestore as the database and a Vue.js frontend. This portal is designed to provide an efficient appointment management experience.
+Dr. John's Appointment Portal is a full-stack application that allows users to easily create and search for appointment bookings. The system includes a Node.js backend with Firebase Firestore as the database and a Vue.js frontend.
 
 ![Screenshot 2024-11-15 012055](https://github.com/user-attachments/assets/699533d9-d11a-4f74-8c57-2bd2acaba507)
 ![Screenshot 2024-11-15 012203](https://github.com/user-attachments/assets/b5831c22-8544-4d34-89d6-7ced1b0662fe)
+
+![Working demo video file!](https://drive.google.com/file/d/1FTZeEBCJaVZS9F0K8YIuN47ll69jDX_4/view?usp=sharing)
 
 ## Table of Contents
 
@@ -133,8 +135,8 @@ The backend exposes the following REST API endpoints:
 3. **Find Bookings within a Date Range**
    - **Endpoint**: `GET /events`
    - **Parameters**:
-     - `startDate`: (string) Start date for the range.
-     - `endDate`: (string) End date for the range.
+     - `startDate`: (ISO string) Start date for the range.
+     - `endDate`: (ISO string) End date for the range.
    - **Description**: Retrieves all bookings scheduled within the specified date range.
 
 ---
