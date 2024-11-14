@@ -1,4 +1,3 @@
-
 <template>
   <nav class="navbar">
     <RouterLink to="/events/book" class="nav-link">Book Event</RouterLink>

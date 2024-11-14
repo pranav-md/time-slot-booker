@@ -31,7 +31,7 @@ import { createEvent } from "@/apis/create-event";
 export default {
   props: {
     selectedDateTime: {
-      type: DateTime, // Expect a DateTime object
+      type: DateTime,
       required: true,
     },
     rerender: {

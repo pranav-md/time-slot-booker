@@ -25,9 +25,9 @@ const handleDate = (modelData) => {
 .date-picker-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Right-aligns the content */
-  max-width: 250px; /* Adjust width as needed */
-  margin-right: auto; /* Pushes the component to the right side */
+  align-items: flex-start; 
+  max-width: 250px; 
+  margin-right: auto;
 }
 
 label {
@@ -37,7 +37,7 @@ label {
 }
 
 #datepicker {
-  width: 100%; /* Ensures the date picker fills the container width */
+  width: 100%;
   padding: 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;

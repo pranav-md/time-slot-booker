@@ -1,7 +1,7 @@
 <template>
   <div class="appointment-portal">
     <h1>Dr. John Appointment search portal:</h1>
-    <DateRangePicker @updateDateTimeRange="handleDateTimeRangeUpdate"/>
+    <DateRangePicker @updateDateTimeRange="handleDateTimeRangeUpdate" />
     <div class="slot-book-container">
       <ListView :startDateTime="startDateTime" :endDateTime="endDateTime" />
     </div>
@@ -19,7 +19,7 @@
 }
 
 .appointment-portal {
-  max-width: 800px; /* Center and set a maximum width */
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -33,12 +33,12 @@ h1 {
 
 .slot-book-container {
   display: flex;
-  width: 100%; /* Occupy the maximum width of the parent container */
+  width: 100%;
 }
 
 .slot-book-container > * {
-  flex: 1; /* Each child takes up half of the container */
-  padding: 1rem; /* Optional padding */
+  flex: 1;
+  padding: 1rem;
   box-sizing: border-box;
   border-top: 1px solid #ccc;
 }
@@ -59,8 +59,8 @@ export default {
   },
   methods: {
     handleDateTimeRangeUpdate({ dateTimeRange }) {
-      this.startDateTime = dateTimeRange[0]
-      this.endDateTime = dateTimeRange[1]
+      this.startDateTime = dateTimeRange[0];
+      this.endDateTime = dateTimeRange[1];
     },
   },
 };

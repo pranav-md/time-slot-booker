@@ -17,8 +17,6 @@
 
 <script>
 import { DateTime } from "luxon";
-// import { formattedEventList } from "./utils";
-// import { getEventsWithinRange } from "@/apis/get-events-within-range";
 import { DURATION } from "@/apis/constants";
 import { getEventsWithinRange } from "@/apis/get-events-within-range";
 import { formatEventTimes } from "./utils";
@@ -78,7 +76,6 @@ export default {
   border-right: 1px solid #ccc;
   border-left: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
-
 }
 
 ul {

@@ -14,7 +14,6 @@ import { DateTime } from "luxon";
 
 export default {
   components: { VueDatePicker },
-
 };
 </script>
 

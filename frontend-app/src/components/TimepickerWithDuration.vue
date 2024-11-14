@@ -28,16 +28,16 @@ export default {
       type: DateTime, // Expect a DateTime object
       required: true,
     },
-    rerender:{
+    rerender: {
       type: Boolean,
-      required: false
-    }
+      required: false,
+    },
   },
   components: { VueDatePicker },
   data() {
     return {
       duration: "",
-      time: ""
+      time: "",
     };
   },
   methods: {
@@ -46,8 +46,8 @@ export default {
         alert("Please select both time and duration.");
         return;
       }
-      
-      const dateTime = this.time; 
+
+      const dateTime = this.time;
       try {
         const response = await createEvent(
           combineDateTime(this.selectedDateTime, dateTime),
@@ -56,7 +56,7 @@ export default {
 
         if (response.status === 200) {
           alert("Booking successful");
-          this.$emit('rerender')
+          this.$emit("rerender");
         } else {
           alert("Booking failed");
         }
@@ -74,8 +74,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 100%; /* Makes the component fill the parent width */
-  max-width: 400px; /* Optional: sets a maximum width for readability */
+  width: 100%;
+  max-width: 400px;
   padding: 1rem;
   box-sizing: border-box;
 }
@@ -91,7 +91,7 @@ label {
 }
 
 input[type="number"] {
-  width: 100%; /* Ensures the input takes up the full width */
+  width: 100%;
   padding: 0.5rem;
   margin-top: 0.5rem;
   font-size: 1rem;
@@ -103,11 +103,11 @@ button {
   padding: 0.75rem;
   font-size: 1rem;
   cursor: pointer;
-  width: 100%; /* Full-width button */
+  width: 100%;
 }
 
 button:hover {
-  background-color: #007bff; /* Optional hover effect */
+  background-color: #007bff;
   color: #fff;
 }
 </style>

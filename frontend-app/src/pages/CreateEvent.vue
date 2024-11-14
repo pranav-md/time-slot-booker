@@ -1,12 +1,17 @@
-
 <template>
   <div class="appointment-portal">
     <h1>Dr. John Appointment booking portal</h1>
     <DatePicker @updateDateTime="handleDateTimeUpdate" />
     <TimezoneDropDown @updateTimezone="handleTimezoneUpdate" />
     <div class="slot-book-container">
-      <FreeSlotsList :selectedDateTime="dateTimeInTimezone" :rerender="rerender"/>
-      <TimepickerWithDuration @rerender="rerenderFreeSlot" :selectedDateTime="dateTimeInTimezone"  />
+      <FreeSlotsList
+        :selectedDateTime="dateTimeInTimezone"
+        :rerender="rerender"
+      />
+      <TimepickerWithDuration
+        @rerender="rerenderFreeSlot"
+        :selectedDateTime="dateTimeInTimezone"
+      />
     </div>
   </div>
 </template>
@@ -22,7 +27,7 @@
 }
 
 .appointment-portal {
-  max-width: 800px; /* Center and set a maximum width */
+  max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -36,17 +41,16 @@ h1 {
 
 .slot-book-container {
   display: flex;
-  width: 100%; /* Occupy the maximum width of the parent container */
+  width: 100%;
 }
 
 .slot-book-container > * {
-  flex: 1; /* Each child takes up half of the container */
-  padding: 1rem; /* Optional padding */
+  flex: 1;
+  padding: 1rem;
   box-sizing: border-box;
   border-top: 1px solid #ccc;
 }
 </style>
-
 
 <script>
 import DatePicker from "../components/DatePicker.vue";
@@ -57,27 +61,41 @@ import { setDateTimeWithTimezone } from "./utils";
 import { DateTime } from "luxon";
 
 export default {
-  components: { DatePicker, TimezoneDropDown, FreeSlotsList, TimepickerWithDuration },
+  components: {
+    DatePicker,
+    TimezoneDropDown,
+    FreeSlotsList,
+    TimepickerWithDuration,
+  },
   data() {
     return {
       dateTime: DateTime.now(),
-      timezone: 'Asia/Kolkata',
-      dateTimeInTimezone: setDateTimeWithTimezone(DateTime.now(), 'Asia/Kolkata'),
-      rerender: false
+      timezone: "Asia/Kolkata",
+      dateTimeInTimezone: setDateTimeWithTimezone(
+        DateTime.now(),
+        "Asia/Kolkata"
+      ),
+      rerender: false,
     };
   },
   methods: {
     handleDateTimeUpdate({ dateTime }) {
       this.dateTime = DateTime.fromJSDate(dateTime);
-      this.dateTimeInTimezone = setDateTimeWithTimezone(this.dateTime, this.timezone)
+      this.dateTimeInTimezone = setDateTimeWithTimezone(
+        this.dateTime,
+        this.timezone
+      );
     },
     handleTimezoneUpdate({ timezone }) {
       this.timezone = timezone;
-      this.dateTimeInTimezone = setDateTimeWithTimezone(this.dateTime, this.timezone)
+      this.dateTimeInTimezone = setDateTimeWithTimezone(
+        this.dateTime,
+        this.timezone
+      );
     },
-    rerenderFreeSlot(){
-      this.rerender = !this.rerender
-    }
+    rerenderFreeSlot() {
+      this.rerender = !this.rerender;
+    },
   },
 };
 </script>
