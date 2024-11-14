@@ -1,42 +1,37 @@
 <template>
   <div class="time-slot-list">
-    <h2>Available Time Slots</h2>
+    <h2>Booked Time Slots</h2>
     <ul>
       <li
-        v-for="({ timeToDisplay, time }, index) in timeSlots"
+        v-for="(timeToDisplay, index) in timeSlots"
         :key="index"
         class="time-slot"
         @mouseover="hoverIndex = index"
         @mouseleave="hoverIndex = null"
       >
         <span>{{ timeToDisplay }}</span>
-        <button
-          v-if="hoverIndex === index"
-          class="book-button"
-          @click="bookSlot(time)"
-        >
-          Book this slot
-        </button>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
-import { getFreeSlots } from "@/apis/get-free-slots";
 import { DateTime } from "luxon";
-import { formattedEventList } from "./utils";
-import { createEvent } from "@/apis/create-event";
+// import { formattedEventList } from "./utils";
+// import { getEventsWithinRange } from "@/apis/get-events-within-range";
+import { DURATION } from "@/apis/constants";
+import { getEventsWithinRange } from "@/apis/get-events-within-range";
+import { formatEventTimes } from "./utils";
 
 export default {
   props: {
-    selectedDateTime: {
+    startDateTime: {
       type: DateTime, // Expect a DateTime object
       required: true,
     },
-    rerender: {
-      type: Boolean,
-      required: false,
+    endDateTime: {
+      type: DateTime, // Expect a DateTime object
+      required: true,
     },
   },
   data() {
@@ -46,37 +41,31 @@ export default {
     };
   },
   watch: {
-    selectedDateTime: {
+    startDateTime: {
+      type: DateTime,
       immediate: true,
-      handler(newVal) {
-        this.fetchFreeSlots(newVal);
+      default: DateTime.now(),
+      handler() {
+        this.fetchBookedSlots();
       },
     },
-    rerender: {
+    endDateTime: {
+      type: DateTime,
       immediate: true,
+      default: DateTime.now().plus({ minutes: DURATION }),
       handler() {
-        this.fetchFreeSlots(this.selectedDateTime);
+        this.fetchBookedSlots();
       },
     },
   },
   methods: {
-    async fetchFreeSlots(dateTime) {
-      const freeSlots = await getFreeSlots(dateTime, dateTime.zoneName);
-      this.timeSlots = formattedEventList(freeSlots);
-    },
-    async bookSlot(slot) {
-      try {
-        const response = await createEvent(slot, 30);
-
-        if (response.status === 200) {
-          this.fetchFreeSlots(this.selectedDateTime);
-          alert("Booking successful");
-        } else {
-          alert("Booking failed");
-        }
-      } catch (error) {
-        alert("Error booking slot: " + error.message);
-        console.error("API error:", error);
+    async fetchBookedSlots() {
+      if (this.startDateTime != null && this.endDateTime != null) {
+        const freeSlots = await getEventsWithinRange(
+          this.startDateTime,
+          this.endDateTime
+        );
+        this.timeSlots = formatEventTimes(freeSlots);
       }
     },
   },
@@ -87,6 +76,9 @@ export default {
 .time-slot-list {
   font-family: Arial, sans-serif;
   border-right: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+
 }
 
 ul {

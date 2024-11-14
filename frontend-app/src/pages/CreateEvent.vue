@@ -1,12 +1,12 @@
 
 <template>
   <div class="appointment-portal">
-    <h1>Dr. John Appointment portal</h1>
+    <h1>Dr. John Appointment booking portal</h1>
     <DatePicker @updateDateTime="handleDateTimeUpdate" />
     <TimezoneDropDown @updateTimezone="handleTimezoneUpdate" />
     <div class="slot-book-container">
-      <FreeSlotsList :selectedDateTime="dateTimeInTimezone" />
-      <TimepickerWithDuration :selectedDateTime="dateTimeInTimezone" />
+      <FreeSlotsList :selectedDateTime="dateTimeInTimezone" :rerender="rerender"/>
+      <TimepickerWithDuration @rerender="rerenderFreeSlot" :selectedDateTime="dateTimeInTimezone"  />
     </div>
   </div>
 </template>
@@ -62,7 +62,8 @@ export default {
     return {
       dateTime: DateTime.now(),
       timezone: 'Asia/Kolkata',
-      dateTimeInTimezone: DateTime.now().plus({minutes: 300})
+      dateTimeInTimezone: setDateTimeWithTimezone(DateTime.now(), 'Asia/Kolkata'),
+      rerender: false
     };
   },
   methods: {
@@ -74,6 +75,9 @@ export default {
       this.timezone = timezone;
       this.dateTimeInTimezone = setDateTimeWithTimezone(this.dateTime, this.timezone)
     },
+    rerenderFreeSlot(){
+      this.rerender = !this.rerender
+    }
   },
 };
 </script>

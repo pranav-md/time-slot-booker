@@ -1,48 +1,73 @@
 <!-- eslint-disable vue/no-export-in-script-setup -->
 <template>
-    <div class="duration-input">
-      <h2>Book time slot with duration</h2>
-      
-      <VueDatePicker v-model="time" time-picker />
-  
-      <label for="duration">Duration (in minutes):</label>
-      <input
-        type="number"
-        id="duration"
-        v-model="duration"
-        placeholder="Enter duration"
-      />
-      <button @click="bookNow">Book now</button>
-    </div>
-  </template>
+  <div class="duration-input">
+    <h2>Book time slot with duration</h2>
+
+    <VueDatePicker v-model="time" time-picker />
+
+    <label for="duration">Duration (in minutes):</label>
+    <input
+      type="number"
+      id="duration"
+      v-model="duration"
+      placeholder="Enter duration"
+    />
+    <button @click="bookNow">Book now</button>
+  </div>
+</template>
 
 <script>
-import VueDatePicker from '@vuepic/vue-datepicker';
+import { createEvent } from "../apis/create-event.js";
+import VueDatePicker from "@vuepic/vue-datepicker";
+import { DateTime } from "luxon";
+import { combineDateTime } from "./utils.js";
 
 export default {
+  props: {
+    selectedDateTime: {
+      type: DateTime, // Expect a DateTime object
+      required: true,
+    },
+    rerender:{
+      type: Boolean,
+      required: false
+    }
+  },
+  components: { VueDatePicker },
   data() {
     return {
-      duration: null, // Stores the user-entered duration
-      time: new Date()
+      duration: "",
+      time: ""
     };
   },
   methods: {
-    bookNow() {
-      if (this.duration) {
-        alert(`You have booked a slot for ${this.duration} minutes.`);
-        // Additional booking logic can go here
-      } else {
-        alert("Please enter a duration.");
+    async bookNow() {
+      if (!this.time || !this.duration) {
+        alert("Please select both time and duration.");
+        return;
       }
-    }
+      
+      const dateTime = this.time; 
+      try {
+        const response = await createEvent(
+          combineDateTime(this.selectedDateTime, dateTime),
+          this.duration
+        );
+
+        if (response.status === 200) {
+          alert("Booking successful");
+          this.$emit('rerender')
+        } else {
+          alert("Booking failed");
+        }
+      } catch (error) {
+        alert("Error booking slot: " + error.message);
+        console.error("API error:", error);
+      }
+    },
   },
-  components: {
-    VueDatePicker
-  }
 };
-
 </script>
-
 
 <style scoped>
 .duration-input {

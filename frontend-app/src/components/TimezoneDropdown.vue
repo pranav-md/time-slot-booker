@@ -1,7 +1,7 @@
 <template>
   <div class="timezone-selector">
     <label for="dropdown">Select the timezone :</label>
-    <select v-model="selectedOption" id="dropdown">
+    <select v-model="selectedOption" id="dropdown" @change="handleSelectionChange">
       <option v-for="option in options" :key="option" :value="option">
         {{ option }}
       </option>
@@ -24,6 +24,14 @@ export default {
       ],
     };
   },
+  methods: {
+    handleSelectionChange() {
+      this.onOptionSelected(this.selectedOption);
+    },
+    onOptionSelected(timezone) {
+      this.$emit('updateTimezone', {timezone})
+    }
+  }
 };
 </script>
 
@@ -32,8 +40,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  max-width: 300px; /* Adjust width as needed */
-  margin-right: auto; /* Pushes the component to the right side */
+  max-width: 300px; 
+  margin-right: auto; 
   margin-top: 15px;
 }
 
