@@ -5,6 +5,8 @@ const {
   getTimezoneFromTimestamp,
   convertEventsToTimezone,
   getStartAndEndTime,
+  isNewEventWithinRange,
+  getFirstStartAndLastEndTimes,
 } = require("./functions.js");
 const {
   getEventsWithinRange: getEventsWithinRangeDB,
@@ -18,14 +20,12 @@ async function getFreeSlots(date, timezone) {
 
   const currDate = DateTime.fromISO(`${date}T00:00:00`, {
     zone: timezone,
-  })
+  });
 
-  const possibleEventSlots = generateIntervals(
-    startTime,
-    endTime,
-    currDate
-  );
-  const bookedEventSlots = await getEventsWithinRangeDB(startTime, endTime);
+  const possibleEventSlots = generateIntervals(startTime, endTime, currDate);
+  
+  const { firstStartTime, lastEndTime } = getFirstStartAndLastEndTimes(possibleEventSlots)
+  const bookedEventSlots = await getEventsWithinRangeDB(firstStartTime, lastEndTime, timezone);
 
   const freeSlots = getEventsWithoutOverlap(
     bookedEventSlots,
@@ -40,18 +40,25 @@ async function createEvent(date, duration) {
 
   const endsAt = startsAt.plus({ minutes: duration });
 
+  const isWithinTimeDuration = isNewEventWithinRange(startsAt, endsAt);
+
+  if (!isWithinTimeDuration) {
+    console.error("Outside the time duration set");
+    return false;
+  }
+
   const isValidEvent = await isNonOverlappingEvent(
     startsAt.toUTC(),
     endsAt.toUTC()
   );
 
-  if (isValidEvent) {
-    await createEventDB(startsAt, duration);
-
-    return true;
+  if (!isValidEvent) {
+    console.error("Found overlapping event");
+    return false;
   }
 
-  return false;
+  await createEventDB(startsAt, duration);
+  return true;
 }
 
 async function getEventsWithinRange(startDate, endDate) {
@@ -60,6 +67,7 @@ async function getEventsWithinRange(startDate, endDate) {
   const startDateTime = convertToDateTime(startDate);
   const endDateTime = convertToDateTime(endDate);
 
+  
   const eventsWithinRange = await getEventsWithinRangeDB(
     startDateTime.toUTC(),
     endDateTime.toUTC()

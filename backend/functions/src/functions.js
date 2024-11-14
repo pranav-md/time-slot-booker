@@ -62,6 +62,20 @@ function generateIntervals(startDate, endDate, currDate) {
   return intervals;
 }
 
+function getFirstStartAndLastEndTimes(events) {
+  if (events.length === 0) return { firstStartTime: null, lastEndTime: null };
+
+  // Sort events by startTime to find the earliest startTime
+  const firstStartTime = events.reduce((earliest, event) => 
+    event.startTime < earliest ? event.startTime : earliest, events[0].startTime);
+
+  // Sort events by endTime to find the latest endTime
+  const lastEndTime = events.reduce((latest, event) => 
+    event.endTime > latest ? event.endTime : latest, events[0].endTime);
+
+  return { firstStartTime, lastEndTime };
+}
+
 //Preserves the year, month, day of dateTime2 and returns the hours, minute, second, ms, tz combined from dateTime1
 function combineDateAndTime(dateTime1, dateTime2) {
   return DateTime.fromObject({
@@ -168,12 +182,39 @@ function getTimezoneFromTimestamp(timestamp) {
   return dateTime.zoneName;
 }
 
-function convertFirestoreTimestampToLuxon(timestamp) {
+function convertFirestoreTimestampToLuxon(timestamp, timezone) {
   // Convert Firestore timestamp to JavaScript Date
   const date = timestamp.toDate();
 
   // Convert Date to Luxon DateTime in UTC
-  return DateTime.fromJSDate(date, { zone: "utc" });
+  return DateTime.fromJSDate(date, { zone: timezone });
+}
+
+function isNewEventWithinRange(newStartDateTime, newEndDateTime) {
+  const date = newStartDateTime.toFormat("yyyy-MM-dd");
+
+  const { startTime: startLimitDateTime, endTime: endLimitDateTime } =
+    getStartAndEndTime(newStartDateTime.zoneName, date);
+
+  const newStartTime = newStartDateTime.toFormat("HH:mm:ss");
+  const newEndTime = newEndDateTime.toFormat("HH:mm:ss");
+
+  const startLimitTime = startLimitDateTime.toFormat("HH:mm:ss");
+  const endLimitTime = endLimitDateTime.toFormat("HH:mm:ss");
+
+  if (startLimitTime < endLimitTime) {
+    if (startLimitTime < newStartTime && newEndTime < endLimitTime) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    if (startLimitTime < newStartTime && startLimitTime < newEndTime)
+      return true;
+    else if (endLimitTime > newStartTime && endLimitTime > newEndTime)
+      return true;
+    else return false;
+  }
 }
 
 // Export the functions for use in other files
@@ -186,4 +227,6 @@ module.exports = {
   getTimezoneFromTimestamp,
   convertEventsToTimezone,
   convertFirestoreTimestampToLuxon,
+  isNewEventWithinRange,
+  getFirstStartAndLastEndTimes
 };

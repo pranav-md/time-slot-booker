@@ -20,7 +20,6 @@ async function createEvent(eventDateTime, duration) {
 
   try {
     await eventsCollection.add(bookedSlotObject(eventDateTimeInUTC, duration));
-    console.log("Event saved successfully");
   } catch (error) {
     console.error("Error saving event:", error);
   }
@@ -35,7 +34,7 @@ async function createEvent(eventDateTime, duration) {
  *
  * @returns {Promise<Array>} - A promise that resolves to an array of events that occur within the specified range.
  */
-async function getEventsWithinRange(startTime, endTime) {
+async function getEventsWithinRange(startTime, endTime, timezone) {
   try {
     const startTimeParam = Timestamp.fromDate(startTime.toJSDate());
     const endTimeParam = Timestamp.fromDate(endTime.toJSDate());
@@ -50,8 +49,8 @@ async function getEventsWithinRange(startTime, endTime) {
     snapshot.forEach((doc) => {
       events.push({
         id: doc.id,
-        startTime: convertFirestoreTimestampToLuxon(doc.data().startTime),
-        endTime: convertFirestoreTimestampToLuxon(doc.data().endTime),
+        startTime: convertFirestoreTimestampToLuxon(doc.data().startTime, timezone),
+        endTime: convertFirestoreTimestampToLuxon(doc.data().endTime, timezone),
       });
     });
 
@@ -65,13 +64,22 @@ async function getEventsWithinRange(startTime, endTime) {
 async function isNonOverlappingEvent(startTime, endTime) {
   try {
     // Query for any events that overlap with the given startTime and endTime
-    const snapshot = await getEventsWithinRange(startTime, endTime);
+    const startTimeParam = Timestamp.fromDate(startTime.toJSDate());
+    const endTimeParam = Timestamp.fromDate(endTime.toJSDate());
+
+    // Query for events that start before endTime and end after startTime
+    const snapshot = await eventsCollection
+      .where("startTime", "<", endTimeParam) // Event starts before the given end time AND
+      .where("endTime", ">", startTimeParam) // Event ends after the given start time
+      .get();
+
 
     // Check if any documents were found
-    if (!snapshot.empty) {
-      return false; // No overlapping event(s) found
+    if (snapshot.empty) {
+      return true; // No overlapping event(s) found
     } else {
-      return true; // Overlapping events found
+      console.error('FOUND OVERLAPPING EVENTS')
+      return false; // Overlapping events found
     }
   } catch (error) {
     console.error("Error querying events:", error);
