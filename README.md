@@ -59,7 +59,13 @@ Dr. John's Appointment Portal is a full-stack application that allows users to e
    ```bash
    npm install
    ```
-
+   
+4. **Login to firebase**:
+   Use the following command to login to the firebase profile:
+   ```bash
+   firebase login
+   ```
+   
 4. **Run the Firebase Emulator**:
    Use the following command to start the Firebase emulator for local testing:
    ```bash
