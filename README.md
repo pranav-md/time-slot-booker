@@ -128,13 +128,13 @@ The backend exposes the following REST API endpoints:
 
 1. **Create a New Booking**
    - **Endpoint**: `POST /events`
-   - **Payload**: `{ "date": "YYYY-MM-DD", "duration": 30 }`
+   - **Payload**: `{ "date": (ISO string), "duration": 30 }`
    - **Description**: Creates a new booking with the specified date and duration.
 
 2. **Get Available Free Slots**
    - **Endpoint**: `GET /events/free-slots`
    - **Parameters**:
-     - `dateTime`: (ISO string) The date and time to check for availability.
+     - `dateTime`:  "YYYY-MM-DD" The date to check for availability.
      - `timezone`: (string) The timezone in which to check the slots.
    - **Description**: Returns all available time slots for the specified date.
 
