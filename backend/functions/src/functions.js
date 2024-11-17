@@ -203,15 +203,15 @@ function isNewEventWithinRange(newStartDateTime, newEndDateTime) {
   const endLimitTime = endLimitDateTime.toFormat("HH:mm:ss");
 
   if (startLimitTime < endLimitTime) {
-    if (startLimitTime < newStartTime && newEndTime < endLimitTime) {
+    if (startLimitTime <= newStartTime && newEndTime <= endLimitTime) {
       return true;
     } else {
       return false;
     }
   } else {
-    if (startLimitTime < newStartTime && startLimitTime < newEndTime)
+    if (startLimitTime <= newStartTime && startLimitTime <= newEndTime)
       return true;
-    else if (endLimitTime > newStartTime && endLimitTime > newEndTime)
+    else if (endLimitTime >= newStartTime && endLimitTime >= newEndTime)
       return true;
     else return false;
   }
