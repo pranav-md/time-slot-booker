@@ -6,7 +6,6 @@ Dr. John's Appointment Portal is a full-stack application that allows users to e
 ![Screenshot 2024-11-15 012055](https://github.com/user-attachments/assets/699533d9-d11a-4f74-8c57-2bd2acaba507)
 ![Screenshot 2024-11-15 012203](https://github.com/user-attachments/assets/b5831c22-8544-4d34-89d6-7ced1b0662fe)
 
-[Working demo video file!](https://drive.google.com/file/d/1Z6RBc2ZsL_iJyFgOITlZxQ9y_bPd-vWr/view?usp=drive_link)
 
 ## Table of Contents
 
